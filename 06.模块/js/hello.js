@@ -22,7 +22,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // a.add(3);
 var User_1 = require("./Models/User");
 var Article_1 = require("./Models/Article");
-var u = new User_1.User("aa");
+var u = new User_1.User({
+    name: "aa"
+});
 User_1.UserDB.add(u);
 var res = User_1.UserDB.get(123);
 var a = new Article_1.Article("vv");

@@ -29,7 +29,10 @@ import {User, UserDB} from "./Models/User"
 import {Article, ArticleDB} from "./Models/Article"
 
 
-var u  = new User("aa")
+var u  = new User({
+  name:"aa"
+})
+
 UserDB.add(u);
 var res = UserDB.get(123);
 
