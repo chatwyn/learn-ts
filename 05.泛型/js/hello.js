@@ -1,112 +1,120 @@
 "use strict";
-// 1.接口 
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-function printName(name) {
-    // 必须传入对象  firstname  和 secondName
-    console.log(name.firstName + "--" + name.secondeName);
+/*
+typeScript中的泛型
+
+    6.1 泛型的定义
+    6.2 泛型函数
+    6.3 泛型类
+    6.4 泛型接口
+   
+*/
+// any可以解决类型对的问题 但是 放弃了类型检查。  不可以指定 传入什么 返回什么
+//  比如 传入number 必须返回 number类型  
+// function getData(value: any): any {
+//     return value;
+// }
+//  泛型： 可以支持不特定的数据类型     要求：传入的参数和返回的参数一致
+// T表示泛型，具体什么类型是调用这个方法的时候决定的
+function getData(value) {
+    return value;
 }
-function printInfo(info) {
-    console.log(info.firstName + "--" + info.secondeName + "--" + info.age);
+// 返回值可以改成any， 不必要跟随泛型
+function getData1(value) {
+    return "aaa";
 }
-var obj = {
-    age: 20,
-    firstName: "aa",
-    secondeName: "ccc"
-};
-printInfo(obj);
-function ajax(config) {
-    var xhr = new XMLHttpRequest();
-    xhr.open(config.type, config.url, true);
-    xhr.send(config.data);
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4 && xhr.status == 200) {
-            console.log("成功");
-            if (config.dataTyoe == "json") {
-                console.log(JSON.parse(xhr.responseText));
-            }
-            else {
-                console.log(xhr.responseText);
+getData(123);
+// getData<number>("123");  //错误的写法
+//  泛型类 
+var MinClass = /** @class */ (function () {
+    function MinClass() {
+        this.list = [];
+    }
+    MinClass.prototype.add = function (num) {
+        this.list.push(num);
+    };
+    MinClass.prototype.min = function () {
+        var minNum = this.list[0];
+        for (var i = 0; i < this.list.length; i++) {
+            if (minNum > this.list[i]) {
+                minNum = this.list[i];
             }
         }
+        return minNum;
     };
-}
-ajax({
-    type: "get",
-    data: "name:张三",
-    url: "http://a.itying.com/api/productlist",
-    dataTyoe: "json"
+    return MinClass;
+}());
+var m = new MinClass(); //实例化类 指定T是number
+m.add(2);
+m.add(24);
+m.add(24);
+m.add(3);
+alert(m.min());
+var getValue = function (value1) {
+    return value1;
+};
+getValue("1233");
+var getValue1 = function (value1) {
+    return value1;
+};
+getValue1("11");
+/*
+
+泛类：泛型可以帮助我们避免重复的代码以及对不特定数据类型的支持(类型校验)，下面我们看看把类当做参数的泛型类
+
+1、定义个类
+2、把类作为参数来约束数据传入的类型
+
+*/
+//定义操作数据库的泛型类
+var MysqlDb = /** @class */ (function () {
+    function MysqlDb() {
+    }
+    MysqlDb.prototype.add = function (info) {
+        console.log(info);
+        return true;
+    };
+    MysqlDb.prototype.updated = function (info, id) {
+        console.log(info);
+        console.log(id);
+        return true;
+    };
+    return MysqlDb;
+}());
+//想给User表增加数据
+// 1、定义一个User类 和数据库进行映射
+var User = /** @class */ (function () {
+    function User() {
+    }
+    return User;
+}());
+var u = new User();
+u.username = '张三';
+u.pasword = '123456';
+var Db = new MysqlDb();
+Db.add(u);
+//2、相关ArticleCate增加数据  定义一个ArticleCate类 和数据库进行映射
+var ArticleCate = /** @class */ (function () {
+    function ArticleCate(params) {
+        this.title = params.title;
+        this.desc = params.desc;
+        this.status = params.status;
+    }
+    return ArticleCate;
+}());
+//增加操作
+// var a=new ArticleCate({
+//     title:'分类',
+//     desc:'1111',
+//     status:1
+// });
+// //类当做参数的泛型类
+// var Db=new MysqlDb<ArticleCate>();
+// Db.add(a);
+//修改数据
+var a = new ArticleCate({
+    title: '分类111',
+    desc: '2222'
 });
-// 方法 必须符合接口
-var md5 = function (key, value) {
-    return key + value;
-};
-var sha1 = function (key, value) {
-    return key + value;
-};
-console.log(md5("name", "张三"));
-console.log(sha1("name", "张三"));
-//  可索引接口 ，数组、对象的约束
-var arr = [333, 344];
-var arr1 = ["111", "222"];
-var arr2 = ["aaa", "vvv"];
-var obect = {
-    name: "20",
-    age: "32"
-};
-// 使用 implements 实现 接口
-var Dog = /** @class */ (function () {
-    function Dog(name) {
-        this.name = name;
-    }
-    Dog.prototype.eat = function () {
-        console.log(this.name);
-    };
-    return Dog;
-}());
-var Cat = /** @class */ (function () {
-    function Cat(name) {
-        this.name = name;
-    }
-    Cat.prototype.eat = function (food) {
-        console.log(this.name);
-    };
-    return Cat;
-}());
-var d = new Dog("ssaaaaas");
-d.eat();
-var c = new Cat("xiaohua");
-c.eat("a");
-var programmer = /** @class */ (function () {
-    function programmer(name) {
-        this.name = name;
-    }
-    programmer.prototype.coding = function (code) {
-        console.log(this.name + code);
-    };
-    return programmer;
-}());
-var Web = /** @class */ (function (_super) {
-    __extends(Web, _super);
-    function Web(name) {
-        return _super.call(this, name) || this;
-    }
-    Web.prototype.study = function () {
-    };
-    Web.prototype.eat = function (str) {
-    };
-    return Web;
-}(programmer));
-var w = new Web("aa");
-w.coding("前端");
+a.status = 0;
+var Db1 = new MysqlDb();
+Db1.updated(a, 12);

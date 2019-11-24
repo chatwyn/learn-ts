@@ -1,240 +1,180 @@
-// 1.接口 
-
-
-// ts中定义方法
-
-
 /*
-function print() {
-    console.log("print");
-}
+typeScript中的泛型
+
+    6.1 泛型的定义
+    6.2 泛型函数
+    6.3 泛型类
+    6.4 泛型接口
+   
 */
 
 
-// ts中自定义方法传入参数对 json 进行约束 ，需要key为 label
+// any可以解决类型对的问题 但是 放弃了类型检查。  不可以指定 传入什么 返回什么
+//  比如 传入number 必须返回 number类型  
 
 
-/*
-function printLabel(labelInfo:{label: string}): void {
-    console.log(labelInfo.label);
+// function getData(value: any): any {
+//     return value;
+// }
+
+//  泛型： 可以支持不特定的数据类型     要求：传入的参数和返回的参数一致
+
+
+// T表示泛型，具体什么类型是调用这个方法的时候决定的
+function getData<T>(value:T): T {
+
+    return value;
+}
+
+// 返回值可以改成any， 不必要跟随泛型
+function getData1<T>(value:T): any {
+    return "aaa"
 }
 
 
-// printLabel("aa");  //错误
+getData<number>(123);
 
-// printLabel({name: "张三"}); //错误
- 
-printLabel({label: "aa"});  //正确
-
-*/
-
-// 对批量方法传入参数进行约束
-
-//接口，行为和动作的规范， 对批量方法进行约束
-
-
-// 传入对象的约束 属性接口
-interface FullName {
-
-    firstName: string;
-    secondeName: string;
-    age?: number;  //可选参数
-}
-
-
-function printName(name: FullName) {
-    // 必须传入对象  firstname  和 secondName
-    console.log(name.firstName + "--" + name.secondeName);
-}
-
-function printInfo(info: FullName) {
-    console.log(info.firstName + "--" + info.secondeName + "--" + info.age);
-}
-
-
-var obj = {  /* 传入的参数必须包含 firstName secondName*/
-    age: 20,
-    firstName: "aa",
-    secondeName: "ccc"
-};
-
-printInfo(obj);
+// getData<number>("123");  //错误的写法
 
 
 
-interface Congig {
-    type: string;
-    url: string;
-    data?: string;
-    dataTyoe: string;
-}
 
-function ajax(config: Congig) {
-    var xhr = new XMLHttpRequest();
+//  泛型类 
 
-    xhr.open(config.type, config.url, true);
-    xhr.send(config.data);
+class MinClass<T> {
+    public list: T[] = []
 
-    xhr.onreadystatechange  = function() {
-        if (xhr.readyState == 4 && xhr.status == 200) {
-            console.log("成功");
+    add(num: T) {
+        this.list.push(num)
+    }
 
-            if (config.dataTyoe == "json") {
-                console.log(JSON.parse(xhr.responseText));
-            } else {
-                console.log(xhr.responseText);
+    min(): T {
+        var minNum = this.list[0];
+
+        for (var i = 0; i < this.list.length; i++ ){
+            if (minNum > this.list[i]) {
+                minNum = this.list[i];
             }
-            
         }
+
+        return minNum;
     }
 }
 
-ajax({
-    type: "get",
-    data: "name:张三",
-    url: "http://a.itying.com/api/productlist",
-    dataTyoe: "json"
-})
+var m = new MinClass<number>();  //实例化类 指定T是number
+
+m.add(2);
+m.add(24);
+m.add(24);
+m.add(3);
+
+alert(m.min());
 
 
-// 函数类型接口: 对方法传入的参数 以及返回值进行约束 
+// 泛型接口
 
-// 加密的函数类型接口
-interface encrypt {
-    (key: string, value: string): string;
+interface ConfigFn {
+    <T>(value1: T): T;
 }
 
-
-// 方法 必须符合接口
-var md5: encrypt = function(key: string, value: string): string {
-
-    return key + value;
+var getValue: ConfigFn = function<T>(value1: T): T {
+    return value1;
 }
 
+getValue<string>("1233")
+// getValue<string>(123) // 错误写法  
 
-var sha1: encrypt = function(key:string, value:string): string {
-    return key + value;
+
+
+// 第二种泛型接口
+interface ConfigFn1<T> {
+    (value1: T): T;
 }
 
-console.log(md5("name", "张三"));
-console.log(sha1("name", "张三"));
- 
-
-
-//  可索引接口 ，数组、对象的约束
-
-
-var arr: number[] = [333, 344];
-
-var arr1: Array<string> = ["111", "222"];
-
-
-// 对数据的约束
-interface UserArr {
-    // 数组接口  索引为number  key 是string
-    [index:number]: string
+var getValue1: ConfigFn1<string> = function(value1: string): string {
+    return value1;
 }
 
-var arr2: UserArr = ["aaa", "vvv"];
+getValue1("11")
 
 
 
+/*
 
-// 对对象的约束
+泛类：泛型可以帮助我们避免重复的代码以及对不特定数据类型的支持(类型校验)，下面我们看看把类当做参数的泛型类
 
-interface UserObj {
-    [index: string]: string
-}
+1、定义个类
+2、把类作为参数来约束数据传入的类型 
 
-var obect: UserObj =  {
-    name: "20",
-    age: "32"
-}
+*/
 
 
-
-//  类类型接口 ：  对类的约束  和 抽象类有点相似
-
-interface Animal {
-    name: string;
-
-    eat(str: string): void
-}
-
-// 使用 implements 实现 接口
-class Dog implements Animal {
-    name: string;
-
-    constructor(name: string) {
-        this.name = name;
+//定义操作数据库的泛型类
+class MysqlDb<T>{
+    add(info:T):boolean{
+        console.log(info);       
+        return true;
     }
-
-    eat(): void {
-        console.log(this.name);
+    updated(info:T,id:number):boolean {
+        console.log(info);  
         
+        console.log(id); 
+
+        return true;
     }
 }
 
-class Cat implements Animal {
-    name: string;
+//想给User表增加数据
 
-    constructor(name: string) {
-        this.name = name;
-    }
+// 1、定义一个User类 和数据库进行映射
 
-    eat(food: string): void {
-        console.log(this.name);
-        
-    }
+class User{
+    username:string | undefined;
+    pasword:string | undefined;
 }
-
-
-var d = new Dog("ssaaaaas")
-d.eat()
-
-var c = new Cat("xiaohua")
-c.eat("a");
+var u=new User();
+u.username='张三';
+u.pasword='123456';
+var Db=new MysqlDb<User>();
+Db.add(u);
 
 
 
-//  接口扩展，  接口可以继承接口
+//2、相关ArticleCate增加数据  定义一个ArticleCate类 和数据库进行映射
 
-interface People {
+class ArticleCate{
+    title:string | undefined;
+    desc:string | undefined;
+    status:number | undefined;
+    constructor(params:{
+        title:string | undefined,
+        desc:string | undefined,
+        status?:number | undefined
+    }){
 
-    eat(): void;
+        this.title=params.title;
+        this.desc=params.desc;
+        this.status=params.status;
+    }
+
 }
+//增加操作
+// var a=new ArticleCate({
+//     title:'分类',
+//     desc:'1111',
+//     status:1
+// });
 
+// //类当做参数的泛型类
+// var Db=new MysqlDb<ArticleCate>();
+// Db.add(a);
 
-interface Student extends Animal {
-    study(): void;
-}
+//修改数据
+var a= new ArticleCate({
+        title:'分类111',
+        desc:'2222'      
+});
 
-
-class programmer {
-    public name: string;
-    constructor(name: string) {
-        this.name = name;
-    }
-
-    coding(code: string) {
-        console.log(this.name + code);
-        
-    }
-}
-
-class Web extends programmer implements Student {
-
-    constructor(name: string) {
-        super(name)
-    }
-
-    study(): void {
-
-    }
-    eat(str: string): void {
-
-    }
-}
-
-let w = new Web("aa")
-w.coding("前端")
+a.status=0;
+var Db1=new MysqlDb<ArticleCate>();
+Db1.updated(a,12);
